@@ -3,7 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class Colors:
     DARK_GRAY: str = "#111111"
-    DEEP_BLUE: str = "#212121"
+    DEEP_BLUE: str = "#2B2B2B"
     DARK_LIGHT_GRAY: str = "#191919"
     LIGHT_GRAY: str = "#474747"
     ACCENT_BLUE: str = "#20b3e0"
@@ -23,7 +23,7 @@ class Colors:
     # Кнопки
     BUTTON_COLOR_BLUE: str = "#20b3e0"
     BUTTON_HOVER_BLUE: str = "#1A8AAC"
-    BUTTON_COLOR_GRAY: str = "#3A3A3A"
-    BUTTON_HOVER_GRAY: str = "#4A4A4A"  # Цвет для наведения серой кнопки
+    BUTTON_COLOR_GRAY: str = "#2A2A2A"
+    BUTTON_HOVER_GRAY: str = "#3F3F3F"  # Цвет для наведения серой кнопки
     CLOSE_BUTTON_HOVER: str = "#f23c3c"
     CLOSE_BUTTON_PRESSED: str = "#dc2626"

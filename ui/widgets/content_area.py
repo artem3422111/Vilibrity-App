@@ -1,7 +1,123 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QScrollArea,
+    QLabel, QPushButton, QHBoxLayout,
+    QSpacerItem, QSizePolicy
+)
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath, QFont
 from ui.styles.colors import Colors
+
+class CategorySwitchWidget(QWidget):
+    category_changed = pyqtSignal(str)  # Сигнал смены категории
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(500, 40)
+        self.active_category = "Все"
+        self.buttons = {}
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(5, 5, 5, 5)  # Внутренние отступы
+        layout.setSpacing(5)  # Расстояние между кнопками
+        
+        # Данные кнопок категорий
+        categories = ["Все", "В тренде", "Новинки", "Популярное"]
+        
+        for category in categories:
+            button = QPushButton(category)
+            button.setFixedSize(120, 30)
+            
+            # Устанавливаем шрифт
+            font = QFont("Inter")
+            font.setPointSize(12)
+            font.setBold(True)
+            button.setFont(font)
+            
+            # Начальная стилизация
+            if category == "Все":
+                # Активная кнопка по умолчанию
+                button.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {Colors.BUTTON_COLOR_GRAY};
+                        border: none;
+                        border-radius: 7px;
+                        color: {Colors.TEXT_PRIMARY};
+                    }}
+                    QPushButton:hover {{
+                        background-color: {Colors.BUTTON_HOVER_GRAY};
+                    }}
+                """)
+            else:
+                # Неактивные кнопки
+                button.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: transparent;
+                        border: none;
+                        border-radius: 7px;
+                        color: {Colors.TEXT_PRIMARY};
+                    }}
+                    QPushButton:hover {{
+                        background-color: {Colors.BUTTON_HOVER_GRAY};
+                    }}
+                """)
+            
+            # Подключаем обработчик
+            button.clicked.connect(lambda checked, cat=category: self.on_category_clicked(cat))
+            
+            layout.addWidget(button)
+            self.buttons[category] = button
+        
+    def on_category_clicked(self, category):
+        # Деактивируем предыдущую активную категорию
+        if self.active_category:
+            self.set_category_active(self.active_category, False)
+        
+        # Активируем новую категорию
+        self.set_category_active(category, True)
+        self.active_category = category
+        
+        # Отправляем сигнал
+        self.category_changed.emit(category)
+    
+    def set_category_active(self, category, active):
+        button = self.buttons.get(category)
+        if button:
+            if active:
+                button.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {Colors.BUTTON_COLOR_GRAY};
+                        border: none;
+                        border-radius: 7px;
+                        color: {Colors.TEXT_PRIMARY};
+                    }}
+                    QPushButton:hover {{
+                        background-color: {Colors.BUTTON_HOVER_GRAY};
+                    }}
+                """)
+            else:
+                button.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: transparent;
+                        border: none;
+                        border-radius: 7px;
+                        color: {Colors.TEXT_PRIMARY};
+                    }}
+                    QPushButton:hover {{
+                        background-color: {Colors.BUTTON_HOVER_GRAY};
+                    }}
+                """)
+    
+    def paintEvent(self, event):
+        # Отрисовка фона плашки
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+        # Рисуем закругленный прямоугольник
+        path = QPainterPath()
+        path.addRoundedRect(0, 0, self.width(), self.height(), 10, 10)
+        painter.fillPath(path, QColor(Colors.LIGHT_GRAY))
 
 class BannerWidget(QWidget):
     def __init__(self, parent=None):
@@ -112,7 +228,7 @@ class BannerWidget(QWidget):
         # Рисуем градиентное затухание внизу
         gradient = QLinearGradient(0, self.height() - 150, 0, self.height())
         gradient.setColorAt(0, Qt.GlobalColor.transparent)
-        gradient.setColorAt(1, QColor(Colors.DARK_GRAY))
+        gradient.setColorAt(1, QColor(Colors.BACKGROUND))
         
         painter.setBrush(gradient)
         painter.setPen(Qt.PenStyle.NoPen)
@@ -139,11 +255,11 @@ class ContentArea(QWidget):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setStyleSheet(f"""
             QScrollArea {{
-                background-color: {Colors.DARK_GRAY};
+                background-color: {Colors.BACKGROUND};
                 border: none;
             }}
             QScrollArea > QWidget > QWidget {{
-                background-color: {Colors.DARK_GRAY};
+                background-color: {Colors.BACKGROUND};
             }}
         """)
         
@@ -158,7 +274,7 @@ class ContentArea(QWidget):
         
         # Layout для содержимого скролла
         content_layout = QVBoxLayout(scroll_content)
-        content_layout.setContentsMargins(50, 40, 50, 0)
+        content_layout.setContentsMargins(50, 40, 50, 0)  # Отступ слева 50px от левой панели
         content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         content_layout.setSpacing(40)
         
@@ -166,5 +282,19 @@ class ContentArea(QWidget):
         self.banner = BannerWidget()
         content_layout.addWidget(self.banner)
         
+        # Плашка переключения категорий (отступ 80px от баннера)
+        categories_spacer = QSpacerItem(20, 80, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        content_layout.addItem(categories_spacer)
+        
+        self.category_switch = CategorySwitchWidget()
+        content_layout.addWidget(self.category_switch)
+        
+        # Подключаем сигнал смены категории
+        self.category_switch.category_changed.connect(self.on_category_changed)
+        
         # Здесь будут другие элементы контента
-        # TODO: Добавить другие секции (популярное, новинки и т.д.)
+        # TODO: Добавить секции с карточками аниме
+        
+    def on_category_changed(self, category):
+        print(f"Выбрана категория: {category}")
+        # Здесь будет логика фильтрации контента по категории

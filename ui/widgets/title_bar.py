@@ -71,7 +71,7 @@ class CustomTitleBar(QWidget):
                 color: white;
             }}
             QPushButton:pressed {{
-                background-color: {Colors.BUTTON_HOVER_BLUE};
+                background-color: {Colors.CLOSE_BUTTON_PRESSED};
             }}
         """)
         
