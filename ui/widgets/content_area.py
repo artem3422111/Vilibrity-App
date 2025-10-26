@@ -1,8 +1,4 @@
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea,
-    QLabel, QPushButton, QHBoxLayout,
-    QSpacerItem, QSizePolicy
-)
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath, QFont
 from ui.styles.colors import Colors
@@ -119,6 +115,47 @@ class CategorySwitchWidget(QWidget):
         path.addRoundedRect(0, 0, self.width(), self.height(), 10, 10)
         painter.fillPath(path, QColor(Colors.LIGHT_GRAY))
 
+class ContinueWatchingSection(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setup_ui()
+        
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(20)
+        
+        # Заголовок "Продолжить просмотр"
+        title_label = QLabel("Продолжить просмотр")
+        title_label.setStyleSheet(f"""
+            QLabel {{
+                color: {Colors.TEXT_PRIMARY};
+                font-family: Inter;
+                font-size: 24px;
+                font-weight: bold;
+            }}
+        """)
+        layout.addWidget(title_label)
+        
+        # Здесь будут карточки продолжения просмотра
+        # TODO: Добавить горизонтальный список карточек
+        
+        # Временный текст-заглушка
+        placeholder = QLabel("Здесь будут карточки аниме, которые вы не досмотрели")
+        placeholder.setStyleSheet(f"""
+            QLabel {{
+                color: {Colors.TEXT_SECONDARY};
+                font-family: Inter;
+                font-size: 16px;
+                padding: 20px;
+                background-color: {Colors.DARK_LIGHT_GRAY};
+                border-radius: 10px;
+            }}
+        """)
+        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        placeholder.setMinimumHeight(200)
+        layout.addWidget(placeholder)
+
 class BannerWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -228,7 +265,7 @@ class BannerWidget(QWidget):
         # Рисуем градиентное затухание внизу
         gradient = QLinearGradient(0, self.height() - 150, 0, self.height())
         gradient.setColorAt(0, Qt.GlobalColor.transparent)
-        gradient.setColorAt(1, QColor(Colors.BACKGROUND))
+        gradient.setColorAt(1, QColor(Colors.DARK_GRAY))
         
         painter.setBrush(gradient)
         painter.setPen(Qt.PenStyle.NoPen)
@@ -255,11 +292,11 @@ class ContentArea(QWidget):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setStyleSheet(f"""
             QScrollArea {{
-                background-color: {Colors.BACKGROUND};
+                background-color: {Colors.DARK_GRAY};
                 border: none;
             }}
             QScrollArea > QWidget > QWidget {{
-                background-color: {Colors.BACKGROUND};
+                background-color: {Colors.DARK_GRAY};
             }}
         """)
         
@@ -282,8 +319,11 @@ class ContentArea(QWidget):
         self.banner = BannerWidget()
         content_layout.addWidget(self.banner)
         
-        # Плашка переключения категорий (отступ 80px от баннера)
-        categories_spacer = QSpacerItem(20, 80, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        self.continue_watching_section = ContinueWatchingSection()
+        content_layout.addWidget(self.continue_watching_section)
+        
+        # Плашка переключения категорий (уменьшенный отступ 40px от секции продолжения просмотра)
+        categories_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         content_layout.addItem(categories_spacer)
         
         self.category_switch = CategorySwitchWidget()
