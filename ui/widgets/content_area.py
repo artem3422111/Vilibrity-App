@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButt
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath, QFont
 from ui.styles.colors import Colors
+from ui.widgets.anime_card import AnimeCard
 
 class CategorySwitchWidget(QWidget):
     category_changed = pyqtSignal(str)  # Сигнал смены категории
@@ -137,24 +138,34 @@ class ContinueWatchingSection(QWidget):
         """)
         layout.addWidget(title_label)
         
-        # Здесь будут карточки продолжения просмотра
-        # TODO: Добавить горизонтальный список карточек
+        # Горизонтальный контейнер для карточек
+        cards_container = QWidget()
+        cards_layout = QHBoxLayout(cards_container)
+        cards_layout.setContentsMargins(0, 0, 0, 0)
+        cards_layout.setSpacing(20)  # Расстояние между карточками
         
-        # Временный текст-заглушка
-        placeholder = QLabel("Здесь будут карточки аниме, которые вы не досмотрели")
-        placeholder.setStyleSheet(f"""
-            QLabel {{
-                color: {Colors.TEXT_SECONDARY};
-                font-family: Inter;
-                font-size: 16px;
-                padding: 20px;
-                background-color: {Colors.DARK_LIGHT_GRAY};
-                border-radius: 10px;
-            }}
-        """)
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setMinimumHeight(200)
-        layout.addWidget(placeholder)
+        # Первая карточка: Доктор Стоун
+        card1 = AnimeCard(
+            title="Доктор Стоун: Финальная битва",
+            genre="Научное",
+            episodes="65 эп.",
+            image_path="assets/images/Rectangle.png"
+        )
+        cards_layout.addWidget(card1)
+        
+        # Вторая карточка: Наруто
+        card2 = AnimeCard(
+            title="Наруто",
+            genre="Приключение", 
+            episodes="220 эп.",
+            image_path="assets/images/Rectangle13.png"
+        )
+        cards_layout.addWidget(card2)
+        
+        # Spacer для выравнивания слева
+        cards_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        
+        layout.addWidget(cards_container)
 
 class BannerWidget(QWidget):
     def __init__(self, parent=None):
