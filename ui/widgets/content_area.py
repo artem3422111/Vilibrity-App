@@ -149,7 +149,7 @@ class ContinueWatchingSection(QWidget):
             title="Доктор Стоун: Финальная битва",
             genre="Научное",
             episodes="65 эп.",
-            image_path="assets/images/Rectangle.png"
+            image_path="assets/images/Rectangle14.png"
         )
         cards_layout.addWidget(card1)
         

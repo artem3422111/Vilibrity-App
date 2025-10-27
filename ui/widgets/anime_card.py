@@ -14,7 +14,7 @@ class AnimeCard(QWidget):
         self.setup_ui()
         
     def setup_ui(self):
-        # Не используем layout для абсолютного позиционирования
+        # Сначала создаем фоновые элементы, затем текстовые поверх них
         self.setup_card_content()
         
     def setup_card_content(self):
@@ -39,6 +39,19 @@ class AnimeCard(QWidget):
                 }}
             """)
         
+        # Нижняя часть с информацией (270x120) - создаем ПЕРВОЙ
+        self.info_label = QLabel(self)
+        self.info_label.setGeometry(0, 330, 270, 120)
+        self.info_label.setStyleSheet(f"""
+            QLabel {{
+                background-color: {Colors.DARK_LIGHT_GRAY};
+                border-top-left-radius: 0px;
+                border-top-right-radius: 0px;
+                border-bottom-left-radius: 18px;
+                border-bottom-right-radius: 18px;
+            }}
+        """)
+        
         # Название аниме (отступ слева 20px, сверху от изображения 30px)
         self.title_label = QLabel(self.title, self)
         self.title_label.setGeometry(20, 360, 230, 25)  # 330 + 30 = 360
@@ -46,7 +59,7 @@ class AnimeCard(QWidget):
             QLabel {{
                 color: {Colors.TEXT_PRIMARY};
                 font-family: Inter;
-                font-size: 16px;
+                font-size: 12px;
                 font-weight: bold;
                 background: transparent;
             }}
@@ -73,23 +86,9 @@ class AnimeCard(QWidget):
                 font-family: Inter;
                 font-size: 12px;
                 background: transparent;
-                text-align: right;
             }}
         """)
-        self.episodes_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        
-        # Нижняя часть с информацией (270x120)
-        self.info_label = QLabel(self)
-        self.info_label.setGeometry(0, 330, 270, 120)
-        self.info_label.setStyleSheet(f"""
-            QLabel {{
-                background-color: {Colors.DARK_LIGHT_GRAY};
-                border-top-left-radius: 0px;
-                border-top-right-radius: 0px;
-                border-bottom-left-radius: 18px;
-                border-bottom-right-radius: 18px;
-            }}
-        """)
+        self.episodes_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         
     def paintEvent(self, event):
         painter = QPainter(self)
