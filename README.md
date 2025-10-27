@@ -83,7 +83,7 @@
 
 1. **Клонируйте репозиторий:**
    ```bash
-   git clone https://github.com/your_username/vilibrity.git
+   git clone https://github.com/artem3422111/Vilibrity-App.git
    cd vilibrity
 
 2. **Создайте и активируйте виртуальное окружение**
