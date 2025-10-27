@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://via.placeholder.com/150x150/6a0dad/ffffff?text=V" alt="Vilibrity Logo" width="150"/>
+<img src="assets/Logo/LOGO.png" alt="Vilibrity Logo" width="150"/>
 
 **Элегантный и мощный клиент для просмотра аниме на Windows**
 
