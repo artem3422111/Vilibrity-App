@@ -114,7 +114,7 @@ class ContinueWatchingSection(QWidget):
         
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(50, 70, 0, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         
         title_label = QLabel("Продолжить просмотр")
