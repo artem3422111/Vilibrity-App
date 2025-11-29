@@ -1,147 +1,8 @@
-# content_area.py (исправленная версия)
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout, QSpacerItem, QSizePolicy
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath, QFont
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel, QPushButton
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath
 from ui.styles.colors import Colors
 from api.api_client import api_client
-from .anime_grid import AnimeGridWidget
-
-class CategorySwitchWidget(QWidget):
-    category_changed = pyqtSignal(str)
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setFixedSize(500, 40)
-        self.active_category = "Все"
-        self.buttons = {}
-        self.setup_ui()
-        
-    def setup_ui(self):
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(5)
-        
-        categories = ["Все", "В тренде", "Новинки", "Популярное"]
-        
-        for category in categories:
-            button = QPushButton(category)
-            button.setFixedSize(120, 30)
-            
-            font = QFont("Inter")
-            font.setPointSize(12)
-            font.setBold(True)
-            button.setFont(font)
-            
-            if category == "Все":
-                button.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: {Colors.BUTTON_COLOR_GRAY};
-                        border: none;
-                        border-radius: 7px;
-                        color: {Colors.TEXT_PRIMARY};
-                    }}
-                    QPushButton:hover {{
-                        background-color: {Colors.BUTTON_HOVER_GRAY};
-                    }}
-                """)
-            else:
-                button.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: transparent;
-                        border: none;
-                        border-radius: 7px;
-                        color: {Colors.TEXT_PRIMARY};
-                    }}
-                    QPushButton:hover {{
-                        background-color: {Colors.BUTTON_HOVER_GRAY};
-                    }}
-                """)
-            
-            button.clicked.connect(lambda checked, cat=category: self.on_category_clicked(cat))
-            
-            layout.addWidget(button)
-            self.buttons[category] = button
-        
-    def on_category_clicked(self, category):
-        if self.active_category:
-            self.set_category_active(self.active_category, False)
-        
-        self.set_category_active(category, True)
-        self.active_category = category
-        
-        self.category_changed.emit(category)
-    
-    def set_category_active(self, category, active):
-        button = self.buttons.get(category)
-        if button:
-            if active:
-                button.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: {Colors.BUTTON_COLOR_GRAY};
-                        border: none;
-                        border-radius: 7px;
-                        color: {Colors.TEXT_PRIMARY};
-                    }}
-                    QPushButton:hover {{
-                        background-color: {Colors.BUTTON_HOVER_GRAY};
-                    }}
-                """)
-            else:
-                button.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: transparent;
-                        border: none;
-                        border-radius: 7px;
-                        color: {Colors.TEXT_PRIMARY};
-                    }}
-                    QPushButton:hover {{
-                        background-color: {Colors.BUTTON_HOVER_GRAY};
-                    }}
-                """)
-    
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        path = QPainterPath()
-        path.addRoundedRect(0, 0, self.width(), self.height(), 10, 10)
-        painter.fillPath(path, QColor(Colors.LIGHT_GRAY))
-
-class ContinueWatchingSection(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setup_ui()
-        
-    def setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        
-        title_label = QLabel("Продолжить просмотр")
-        title_label.setStyleSheet(f"""
-            QLabel {{
-                color: {Colors.TEXT_PRIMARY};
-                font-family: Inter;
-                font-size: 24px;
-                font-weight: bold;
-            }}
-        """)
-        layout.addWidget(title_label)
-        
-        placeholder = QLabel("Здесь будут карточки аниме, которые вы не досмотрели")
-        placeholder.setStyleSheet(f"""
-            QLabel {{
-                color: {Colors.TEXT_SECONDARY};
-                font-family: Inter;
-                font-size: 16px;
-                padding: 20px;
-                background-color: {Colors.DARK_LIGHT_GRAY};
-                border-radius: 10px;
-            }}
-        """)
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setMinimumHeight(200)
-        layout.addWidget(placeholder)
 
 class BannerWidget(QWidget):
     def __init__(self, parent=None):
@@ -267,7 +128,6 @@ class BannerWidget(QWidget):
 class ContentArea(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.current_category = "Все"
         self.setup_ui()
         self.load_initial_data()
         
@@ -296,55 +156,16 @@ class ContentArea(QWidget):
         content_layout = QVBoxLayout(scroll_content)
         content_layout.setContentsMargins(50, 40, 50, 0)
         content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        content_layout.setSpacing(40)
+        content_layout.setSpacing(0)
         
+        # Только баннер с рекомендациями
         self.banner = BannerWidget()
         content_layout.addWidget(self.banner)
         
-        continue_watching_spacer = QSpacerItem(20, 80, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        content_layout.addItem(continue_watching_spacer)
-        
-        self.continue_watching_section = ContinueWatchingSection()
-        content_layout.addWidget(self.continue_watching_section)
-        
-        categories_spacer = QSpacerItem(20, 80, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-        content_layout.addItem(categories_spacer)
-        
-        self.category_switch = CategorySwitchWidget()
-        content_layout.addWidget(self.category_switch)
-        
-        self.anime_grid = AnimeGridWidget()
-        content_layout.addWidget(self.anime_grid)
-        
-        self.category_switch.category_changed.connect(self.on_category_changed)
-        self.anime_grid.load_more.connect(self.load_more_anime)
+        # Spacer для заполнения оставшегося пространства
+        spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        content_layout.addItem(spacer)
         
     def load_initial_data(self):
         recommended_data = api_client.get_recommended()
         self.banner.update_recommended(recommended_data)
-        
-        self.load_anime_by_category(self.current_category)
-    
-    def on_category_changed(self, category):
-        self.current_category = category
-        self.anime_grid.current_page = 1
-        self.anime_grid.current_category = category
-        self.anime_grid.clear_grid()
-        self.load_anime_by_category(category)
-    
-    def load_anime_by_category(self, category):
-        if category == "Все":
-            data = api_client.get_anime_list("all", self.anime_grid.current_page)
-        elif category == "В тренде":
-            data = api_client.get_trending(self.anime_grid.current_page)
-        elif category == "Новинки":
-            data = api_client.get_new(self.anime_grid.current_page)
-        elif category == "Популярное":
-            data = api_client.get_popular(self.anime_grid.current_page)
-        
-        if "data" in data and isinstance(data["data"], list):
-            self.anime_grid.add_anime_cards(data["data"])
-    
-    def load_more_anime(self):
-        self.anime_grid.current_page += 1
-        self.load_anime_by_category(self.current_category)
