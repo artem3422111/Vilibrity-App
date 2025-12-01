@@ -2,7 +2,9 @@
 
 <div align="center">
 
-<img src="assets/Logo/LOGO.png" alt="Vilibrity Logo" width="150"/>
+<img src="assets/Logo/LOGO.png" alt="Vilibrity Logo" width="300"/>
+
+> ⚠️ **Важная информация:** !!!Проект разрабатывется при помощи нейросети!!!
 
 **Элегантный и мощный клиент для просмотра аниме на Windows**
 

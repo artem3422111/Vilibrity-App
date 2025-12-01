@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QSpacerItem, QSizePolicy
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPainter, QLinearGradient, QColor, QFont
+from PyQt6.QtGui import QPainter, QColor, QFont
 from ui.styles.colors import Colors
 import config
 
@@ -8,7 +8,7 @@ class CustomTitleBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        self.setFixedHeight(config.TITLE_BAR_HEIGHT)
+        self.setFixedHeight(40)
         self.setup_ui()
         
     def setup_ui(self):

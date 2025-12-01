@@ -9,7 +9,7 @@ class LeftPanel(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(config.LEFT_PANEL_WIDTH, config.LEFT_PANEL_HEIGHT)
+        self.setFixedSize(300, 970)
         self.active_button = None
         self.buttons = {}
         self.setup_ui()

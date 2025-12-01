@@ -8,7 +8,7 @@ import config
 class TopPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(config.TOP_PANEL_HEIGHT)
+        self.setFixedHeight(70)
         self.setup_ui()
         
     def setup_ui(self):

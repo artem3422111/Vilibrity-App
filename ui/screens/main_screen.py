@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
         
     def setup_window(self):
         # Полноэкранный режим 1920x1080
-        self.setFixedSize(config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+        self.setFixedSize(1920, 1080)
         # Убираем стандартную рамку
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         
