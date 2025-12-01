@@ -34,3 +34,4 @@ Thumbs.db
 # Ваши специфические файлы, которые хотите игнорировать
 # например: config.local.json
 test.py
+continue_watching.json

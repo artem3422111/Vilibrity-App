@@ -1,8 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel, QPushButton
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath
+import json
+import os
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QLabel, QPushButton, QHBoxLayout, QSpacerItem, QSizePolicy, QGridLayout
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPainter, QPixmap, QLinearGradient, QColor, QPainterPath, QFont
 from ui.styles.colors import Colors
 from api.api_client import api_client
+from .continue_watching_card import ContinueWatchingCard
 
 class BannerWidget(QWidget):
     def __init__(self, parent=None):
@@ -125,6 +128,71 @@ class BannerWidget(QWidget):
         painter.setBrush(top_gradient)
         painter.drawRect(0, 0, self.width(), 200)
 
+class ContinueWatchingSection(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.continue_watching_data = []
+        self.setup_ui()
+        self.load_continue_watching_data()
+        
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Заголовок секции
+        title_label = QLabel("Продолжить просмотр")
+        title_label.setStyleSheet(f"""
+            QLabel {{
+                color: {Colors.TEXT_PRIMARY};
+                font-family: Inter;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 30px;
+            }}
+        """)
+        layout.addWidget(title_label)
+        
+        # Сетка для карточек с 5 в строке и отступом 43px
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.grid_layout.setHorizontalSpacing(43)  # Отступ между карточками по горизонтали 43px
+        self.grid_layout.setVerticalSpacing(30)    # Отступ между карточками по вертикали 30px
+        
+        layout.addLayout(self.grid_layout)
+        
+        # Добавляем растягивающийся спейсер после сетки
+        layout.addStretch()
+        
+    def load_continue_watching_data(self):
+        """Загружает данные о продолжении просмотра из JSON файла"""
+        try:
+            if os.path.exists('continue_watching.json'):
+                with open('continue_watching.json', 'r', encoding='utf-8') as f:
+                    self.continue_watching_data = json.load(f)
+            
+            self.update_cards_display()
+        except Exception as e:
+            print(f"Ошибка загрузки continue_watching.json: {e}")
+            self.continue_watching_data = []
+    
+    def update_cards_display(self):
+        """Обновляет отображение карточек в сетке"""
+        # Очищаем старые карточки
+        for i in reversed(range(self.grid_layout.count())):
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget:
+                widget.deleteLater()
+        
+        # Если есть данные, показываем карточки в сетке 5 в строке
+        if self.continue_watching_data:
+            for i, anime_data in enumerate(self.continue_watching_data):
+                row = i // 5  # Номер строки
+                col = i % 5   # Номер колонки
+                
+                card = ContinueWatchingCard(anime_data)
+                self.grid_layout.addWidget(card, row, col)
+
 class ContentArea(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -135,7 +203,7 @@ class ContentArea(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         scroll_area.setStyleSheet(f"""
             QScrollArea {{
                 background-color: {Colors.DARK_GRAY};
@@ -154,13 +222,21 @@ class ContentArea(QWidget):
         layout.addWidget(scroll_area)
         
         content_layout = QVBoxLayout(scroll_content)
-        content_layout.setContentsMargins(50, 40, 50, 0)
+        content_layout.setContentsMargins(50, 40, 50, 40)
         content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         content_layout.setSpacing(0)
         
-        # Только баннер с рекомендациями
+        # Баннер с рекомендациями
         self.banner = BannerWidget()
         content_layout.addWidget(self.banner)
+        
+        # Отступ 70px после баннера
+        continue_watching_spacer = QSpacerItem(20, 70, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        content_layout.addItem(continue_watching_spacer)
+        
+        # Секция "Продолжить просмотр" (будет скрыта если нет данных)
+        self.continue_watching_section = ContinueWatchingSection()
+        content_layout.addWidget(self.continue_watching_section)
         
         # Spacer для заполнения оставшегося пространства
         spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
@@ -169,3 +245,9 @@ class ContentArea(QWidget):
     def load_initial_data(self):
         recommended_data = api_client.get_recommended()
         self.banner.update_recommended(recommended_data)
+        
+        # Скрываем секцию "Продолжить просмотр" если нет данных
+        if not self.continue_watching_section.continue_watching_data:
+            self.continue_watching_section.hide()
+        else:
+            self.continue_watching_section.show()
